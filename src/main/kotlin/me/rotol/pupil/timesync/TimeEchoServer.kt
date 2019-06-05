@@ -35,7 +35,7 @@ class TimeEchoServer(
 
         this.selector = Selector.open()
 
-        this.server.registerSelector(this.selector, SelectionKey.OP_ACCEPT, ::handleClientAccept)
+        this.server.register(this.selector, SelectionKey.OP_ACCEPT, ::handleClientAccept)
 
         this.thread = Thread(::run, "TimeEchoServer")
         this.thread.isDaemon = true
@@ -47,7 +47,7 @@ class TimeEchoServer(
             val client = (key.channel() as ServerSocketChannel).accept()
             client.configureBlocking(false)
 
-            client.registerSelector(sel, SelectionKey.OP_READ, ::handleClient)
+            client.register(sel, SelectionKey.OP_READ, ::handleClient)
         }
     }
 
@@ -103,6 +103,3 @@ class TimeEchoServer(
         this.thread.join()
     }
 }
-
-private fun SelectableChannel.registerSelector(sel: Selector, ops: Int, handler: Handler) =
-        this.register(sel, ops, handler)
