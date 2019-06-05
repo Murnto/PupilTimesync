@@ -22,6 +22,9 @@ class TimeEchoServer(
     private lateinit var server: ServerSocketChannel
     private lateinit var selector: Selector
     private lateinit var thread: Thread
+    private val readBuffer = ByteBuffer.allocate(4)
+    private val timeBuffer = ByteBuffer.allocate(8)
+        .order(ByteOrder.LITTLE_ENDIAN)
     var port: Int = -1
 
     fun start() {
@@ -60,8 +63,8 @@ class TimeEchoServer(
 
         val client = key.channel() as SocketChannel
 
-        val buf = ByteBuffer.allocate(4)
-        val amount = client.read(buf)
+        readBuffer.rewind()
+        val amount = client.read(readBuffer)
 
         if (amount == -1) {
             key.cancel()
@@ -69,11 +72,9 @@ class TimeEchoServer(
             return
         }
 
-        val timeBuf = ByteBuffer.allocate(8)
-            .order(ByteOrder.LITTLE_ENDIAN)
-        timeBuf.putDouble(this.timeFunction())
-        timeBuf.rewind()
-        client.write(timeBuf)
+        timeBuffer.putDouble(0, this.timeFunction())
+        timeBuffer.rewind()
+        client.write(timeBuffer)
     }
 
     @Suppress("UNCHECKED_CAST")
