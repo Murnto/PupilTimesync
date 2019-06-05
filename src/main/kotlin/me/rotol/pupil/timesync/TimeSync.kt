@@ -20,7 +20,7 @@ class TimeSync(
         private val logger by LoggerDelegate()
     }
 
-    private var currentOffset: Double = 5000.0
+    private var currentOffset: Double = 0.0
     private var hasBeenMaster = 0.0
     private var hasBeenSynced = 0.0
     private val tieBreaker = Random.nextDouble()
