@@ -12,6 +12,7 @@ private const val PROTOCOL_VERSION = "v1"
 class TimeSync(
     private val nodeName: String = InetAddress.getLocalHost().hostName,
     private var syncGroupPrefix: String = "default",
+    existingNetwork: Zyre? = null,
     baseBias: Double = 1.0
 ) {
     companion object {
@@ -31,7 +32,8 @@ class TimeSync(
         }
     private val masterService = ClockSyncMaster(::getTime)
     private var followerService: ClockSyncFollower? = null
-    private var discovery: Zyre? = null
+    private var discovery: Zyre? = existingNetwork
+    private var ourDiscovery: Boolean = existingNetwork != null
     private val leaderboard: PriorityQueue<ClockService> = PriorityQueue()
     val lockOffset = AtomicBoolean(false)
 
@@ -128,19 +130,29 @@ class TimeSync(
         this.followerService = null
     }
 
-    private fun restartDiscovery() {
+    private fun restartDiscovery(newNetwork: Zyre? = null) {
         if (this.discovery != null) {
             this.discovery!!.leave(this.syncGroup)
-            this.discovery!!.stop()
-            this.discovery!!.close()
+
+            if (this.ourDiscovery) {
+                this.discovery!!.stop()
+                this.discovery!!.close()
+            }
+
             this.discovery = null
 
             this.leaderboard.clear()
         }
 
-        this.discovery = Zyre(this.nodeName)
-        this.discovery!!.join(this.syncGroup)
-        this.discovery!!.start()
+        this.ourDiscovery = newNetwork == null
+        if (this.ourDiscovery) {
+            this.discovery = Zyre(this.nodeName)
+            this.discovery!!.join(this.syncGroup)
+            this.discovery!!.start()
+        } else {
+            this.discovery = newNetwork
+            this.discovery!!.join(this.syncGroup)
+        }
 
         this.announceClockMasterInfo()
     }
