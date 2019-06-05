@@ -11,7 +11,8 @@ private const val PROTOCOL_VERSION = "v1"
 
 class TimeSync(
     private val nodeName: String = InetAddress.getLocalHost().hostName,
-    private var syncGroupPrefix: String = "default"
+    private var syncGroupPrefix: String = "default",
+    baseBias: Double = 1.0
 ) {
     companion object {
         @JvmStatic
@@ -22,7 +23,12 @@ class TimeSync(
     private var hasBeenMaster = 0.0
     private var hasBeenSynced = 0.0
     private val tieBreaker = Random.nextDouble()
-    private var baseBias = 1.0
+    var baseBias = baseBias
+        set(value) {
+            field = value
+
+            this.announceClockMasterInfo()
+        }
     private val masterService = ClockSyncMaster(::getTime)
     private var followerService: ClockSyncFollower? = null
     private var discovery: Zyre? = null
