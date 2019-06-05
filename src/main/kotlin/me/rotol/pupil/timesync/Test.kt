@@ -1,7 +1,5 @@
 package me.rotol.pupil.timesync
 
-import java.net.InetAddress
-
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {

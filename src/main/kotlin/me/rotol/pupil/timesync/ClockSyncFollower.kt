@@ -23,7 +23,6 @@ private val retryInterval = 1000L
 private val slewInterval = 100L
 private val SYNC_BUF = byteArrayOf(0x73, 0x79, 0x6E, 0x6C)
 
-
 class ClockSyncFollower(
     var address: String,
     var port: Int,

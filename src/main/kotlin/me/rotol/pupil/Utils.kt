@@ -1,28 +1,15 @@
 package me.rotol.pupil
 
 import org.zeromq.ZMQ
-import org.zeromq.ZMsg
 import org.zeromq.czmq.Zmsg
 import org.zeromq.zyre.Zyre
 import org.zeromq.zyre.ZyreEvent
 import java.util.*
+import java.util.logging.Level.FINE
+import java.util.logging.Level.SEVERE
 import java.util.logging.Logger
-import java.util.logging.Level.*
 
 val __LOG = Logger.getLogger("Utils")
-
-
-//fun Zyre.shoutJson(group: String, obj: Any) {
-//    this.shouts(group, mapper.writeValueAsString(obj).also {
-//        __LOG.log(FINE, "Zyre.shoutJson", it)
-//    })
-//}
-//
-//fun Zyre.whisperJson(peer: String, obj: Any) {
-//    this.whispers(peer, mapper.writeValueAsString(obj).also {
-//        __LOG.log(FINE, "Zyre.whisperJson($peer)", it)
-//    })
-//}
 
 fun Zyre.recentEvents() = sequence {
     while (this@recentEvents.socket().events() and ZMQ.Poller.POLLIN != 0) {
@@ -76,6 +63,7 @@ fun ZyreEvent.multipart(): Sequence<String> = sequence {
     val msg = this@multipart.msg
     var frameString: String? = msg.popstr()
     while (frameString != null) {
+        @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
         yield(frameString!!)
 
         frameString = msg.popstr()
@@ -89,15 +77,15 @@ fun Zyre.shoutMultipart(group: String, vararg data: Any) {
 fun constructMultipart(vararg data: Any): Zmsg {
     val msg = Zmsg()
     data.forEach {
-            when (it) {
-                is String -> msg.addstr(it)
-                is ByteArray -> msg.addmem(it, it.size.toLong())
-                else -> {
-                    __LOG.log(SEVERE, "ZMQ.Socket.sendMultiPart", "Bad argument type ${it.javaClass}")
-                    throw IllegalArgumentException(it.javaClass.canonicalName)
-                }
+        when (it) {
+            is String -> msg.addstr(it)
+            is ByteArray -> msg.addmem(it, it.size.toLong())
+            else -> {
+                __LOG.log(SEVERE, "ZMQ.Socket.sendMultiPart", "Bad argument type ${it.javaClass}")
+                throw IllegalArgumentException(it.javaClass.canonicalName)
             }
         }
+    }
     return msg
 }
 
@@ -113,5 +101,5 @@ inline fun <reified T> timeExec(tag: String, mark: String, block: () -> T): T {
 }
 
 fun getIpv4(address: String): String {
-    return address.split("//", limit=2)[1].split(":")[0]
+    return address.split("//", limit = 2)[1].split(":")[0]
 }

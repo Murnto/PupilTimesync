@@ -2,7 +2,6 @@ package me.rotol.pupil.timesync
 
 import me.rotol.pupil.LoggerDelegate
 
-
 class ClockSyncMaster(
     private val timeFunction: () -> Double
 ) {

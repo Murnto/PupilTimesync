@@ -75,11 +75,13 @@ class TimeSync(
                 }
             } else if (it.type() == "JOIN" && it.group() == this.syncGroup) {
                 shouldAnnounce = true
-            } else if (it.type() == "LEAVE" && it.group() == this.syncGroup
-                || it.type() == "EXIT"
+            } else if (it.type() == "LEAVE" && it.group() == this.syncGroup ||
+                it.type() == "EXIT"
             ) {
                 this.removeFromLeaderboard(it.peerUuid())
                 this.evaluateLeaderboard()
+            } else {
+                /* Unhandled */
             }
         }
 
@@ -89,6 +91,8 @@ class TimeSync(
             this.evaluateLeaderboard()
         } else if (shouldAnnounce) {
             this.announceClockMasterInfo()
+        } else {
+            /* Nothing */
         }
     }
 
