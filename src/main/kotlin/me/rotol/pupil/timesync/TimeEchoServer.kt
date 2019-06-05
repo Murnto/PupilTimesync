@@ -5,8 +5,10 @@ import java.net.InetSocketAddress
 import java.net.StandardSocketOptions
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.nio.channels.*
-import kotlin.math.log
+import java.nio.channels.SelectionKey
+import java.nio.channels.Selector
+import java.nio.channels.ServerSocketChannel
+import java.nio.channels.SocketChannel
 
 
 private typealias Handler = (selector: Selector, key: SelectionKey) -> Unit
@@ -56,7 +58,7 @@ class TimeEchoServer(
 
     private fun handleClient(sel: Selector, key: SelectionKey) {
         if (!key.isValid || !key.isReadable) {
-            logger.warn("Cancelled at 1")
+            logger.debug("Cancelled an invalid or unreadable key")
             key.cancel()
             return
         }
@@ -99,6 +101,7 @@ class TimeEchoServer(
     }
 
     fun stop() {
+        logger.info("Stopping")
         this.server.close()
         this.selector.close()
         this.thread.join()
