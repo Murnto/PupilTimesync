@@ -81,7 +81,7 @@ fun constructMultipart(vararg data: Any): Zmsg {
             is String -> msg.addstr(it)
             is ByteArray -> msg.addmem(it, it.size.toLong())
             else -> {
-                __LOG.log(SEVERE, "ZMQ.Socket.sendMultiPart", "Bad argument type ${it.javaClass}")
+                __LOG.log(SEVERE, "constructMultipart", "Bad argument type ${it.javaClass}")
                 throw IllegalArgumentException(it.javaClass.canonicalName)
             }
         }
