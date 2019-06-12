@@ -32,7 +32,7 @@ class TimeSync(
         }
     private val masterService = ClockSyncMaster(::getTime)
     private var followerService: ClockSyncFollower? = null
-    private var discovery: Zyre? = existingNetwork
+    private var discovery: Zyre? = null
     private var ourDiscovery: Boolean = existingNetwork != null
     private val leaderboard: PriorityQueue<ClockService> = PriorityQueue()
     val lockOffset = AtomicBoolean(false)
@@ -44,7 +44,7 @@ class TimeSync(
         get() = "$syncGroupPrefix-time_sync-$PROTOCOL_VERSION"
 
     init {
-        this.restartDiscovery()
+        this.restartDiscovery(existingNetwork)
     }
 
     fun pollNetwork() {
