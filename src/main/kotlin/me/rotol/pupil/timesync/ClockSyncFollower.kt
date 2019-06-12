@@ -1,6 +1,7 @@
 package me.rotol.pupil.timesync
 
 import me.rotol.pupil.LoggerDelegate
+import java.net.ConnectException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -130,6 +131,8 @@ class ClockSyncFollower(
             logger.info("Offset: ${avgOffset / MILLISECONDS} (${offsetJitter / MILLISECONDS})")
 
             return avgOffset to offsetJitter
+        } catch (e: ConnectException) {
+            logger.error("Failed to getOffset for $address:$port - ${e.message}")
         } catch (e: Exception) {
             logger.error("Failed to getOffset for $address:$port - ${e.message}")
             e.printStackTrace()
