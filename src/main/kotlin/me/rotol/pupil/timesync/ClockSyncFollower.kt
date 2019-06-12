@@ -13,16 +13,6 @@ import kotlin.random.Random
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KFunction1
 
-private val ms = 1 / 1000.0
-private val us = ms * ms
-private val tolerance = 0.1 * ms
-private val maxSlew = 500 * us
-private val minJump = 10 * ms
-private val slewIterations = (minJump / maxSlew).toInt()
-private val retryInterval = 1000L
-private val slewInterval = 100L
-private val SYNC_BUF = byteArrayOf(0x73, 0x79, 0x6E, 0x6C)
-
 class ClockSyncFollower(
     var address: String,
     var port: Int,
@@ -34,11 +24,22 @@ class ClockSyncFollower(
     companion object {
         @JvmStatic
         private val logger by LoggerDelegate()
+
+        private const val MILLISECONDS = 1 / 1_000.0
+        private const val MICROSECONDS = MILLISECONDS * MILLISECONDS
+        private const val TOLERANCE = 0.1 * MILLISECONDS
+        private const val MAX_SLEW = 500 * MICROSECONDS
+        private const val MIN_JUMP = 10 * MILLISECONDS
+        private const val SLEW_ITERATIONS = (MIN_JUMP / MAX_SLEW).toInt()
+        private const val RETRY_INTERVAL = 1_000L
+        private const val SLEW_INTERVAL = 100L
+        private const val STARTING_JITTER = 1_000_000.0
+        private val SYNC_BUF = byteArrayOf(0x73, 0x79, 0x6E, 0x6C)
     }
 
     private val thread: Thread
     private var running = true
-    private var syncJitter = 1000000.0
+    private var syncJitter = STARTING_JITTER
     private var offsetRemains = true
     var inSync = false
         private set
@@ -58,29 +59,29 @@ class ClockSyncFollower(
                 val (offset, jitter) = result
 
                 this.syncJitter = jitter
-                if (abs(offset) > max(jitter, tolerance)) {
-                    if (abs(offset) > minJump) {
+                if (abs(offset) > max(jitter, TOLERANCE)) {
+                    if (abs(offset) > MIN_JUMP) {
                         if (this.jumpFunction(offset)) {
                             this.inSync = true
                             this.offsetRemains = false
-                            logger.debug("Time adjusted by ${offset / ms}ms")
+                            logger.debug("Time adjusted by ${offset / MILLISECONDS}ms")
                         } else {
                             this.inSync = false
                             this.offsetRemains = true
-                            Thread.sleep(retryInterval)
+                            Thread.sleep(RETRY_INTERVAL)
                             continue
                         }
                     } else {
-                        for (x in 0 until slewIterations) {
-                            val slewTime = max(-maxSlew, min(maxSlew, offset))
+                        for (x in 0 until SLEW_ITERATIONS) {
+                            val slewTime = max(-MAX_SLEW, min(MAX_SLEW, offset))
                             this.slewFunction(slewTime)
-                            logger.debug("Time slewed by ${slewTime / ms}ms")
+                            logger.debug("Time slewed by ${slewTime / MILLISECONDS}ms")
 
                             val slewedOffset = offset - slewTime
-                            this.inSync = abs(slewedOffset) < us
+                            this.inSync = abs(slewedOffset) < MICROSECONDS
                             this.offsetRemains = !this.inSync
                             if (!this.inSync) {
-                                Thread.sleep(slewInterval)
+                                Thread.sleep(SLEW_INTERVAL)
                             }
 
                             break
@@ -96,7 +97,7 @@ class ClockSyncFollower(
             } else {
                 logger.debug("Failed to connect. Will retry")
                 this.inSync = false
-                Thread.sleep(retryInterval)
+                Thread.sleep(RETRY_INTERVAL)
             }
 
             Thread.sleep(Random.nextLong(1000))
@@ -126,7 +127,7 @@ class ClockSyncFollower(
                 .map { abs(avgOffset - it) }
                 .average()
 
-            logger.info("Offset: ${avgOffset / ms} (${offsetJitter / ms})")
+            logger.info("Offset: ${avgOffset / MILLISECONDS} (${offsetJitter / MILLISECONDS})")
 
             return avgOffset to offsetJitter
         } catch (e: Exception) {
