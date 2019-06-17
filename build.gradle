@@ -27,8 +27,8 @@ dependencies {
     implementation 'org.zeromq:czmq-jni:4.2.1'
     implementation 'org.zeromq:zyre-jni:2.0.1'
 
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.8.0-beta4'
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta4'
+    testRuntime group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.26'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.26'
 }
 
 publishing {
