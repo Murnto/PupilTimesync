@@ -198,7 +198,7 @@ class TimeSync(
         }
 
         this.leaderboard.forEachIndexed { i, cs ->
-            println("$i: rank=${cs.rank} ${cs.uuid}")
+            logger.debug("$i: rank=${cs.rank} ${cs.uuid} ${this.discovery!!.peerAddress(cs.uuid)}")
         }
         this.leaderboard
             .filter { this.discovery!!.uuid() != it.uuid } // Don't remove ourselves
