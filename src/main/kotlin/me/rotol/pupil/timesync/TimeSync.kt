@@ -172,8 +172,13 @@ class TimeSync(
 
     private fun updateLeaderboard(uuid: String, name: String, rank: Double, port: Int) {
         val existing = this.leaderboard.firstOrNull { it.uuid == uuid }
-        if (existing != null && (existing.rank != rank || existing.port != port)) {
-            this.removeFromLeaderboard(existing.uuid)
+        if (existing != null) {
+            if (existing.rank != rank || existing.port != port) {
+                this.removeFromLeaderboard(existing.uuid)
+            } else {
+                logger.info("Skipping update for $existing with unchanged info")
+                return
+            }
         }
 
         val cs = ClockService(uuid, name, rank, port)
