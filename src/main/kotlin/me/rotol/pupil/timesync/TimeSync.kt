@@ -207,6 +207,7 @@ class TimeSync(
 
         val currentLeader = this.leaderboard.first()
         if (this.discovery!!.uuid() != currentLeader.uuid) {
+            logger.info("leader.uuid=${currentLeader.uuid}: ${this.discovery!!.peerAddress(currentLeader.uuid)}")
             val leaderHost = getIpv4(this.discovery!!.peerAddress(currentLeader.uuid))
             logger.debug("We aren't the leader, leaderHost=$leaderHost existingFollower=$followerService")
 
