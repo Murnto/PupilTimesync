@@ -200,6 +200,10 @@ class TimeSync(
         this.leaderboard.forEachIndexed { i, cs ->
             println("$i: rank=${cs.rank} ${cs.uuid}")
         }
+        this.leaderboard
+            .filter { this.discovery!!.uuid() != it.uuid } // Don't remove ourselves
+            .filter { this.discovery!!.peerAddress(it.uuid).isNullOrBlank() }
+            .forEach { this.removeFromLeaderboard(it.uuid) }
 
         val currentLeader = this.leaderboard.first()
         if (this.discovery!!.uuid() != currentLeader.uuid) {
