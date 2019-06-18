@@ -120,9 +120,14 @@ class TimeSync(
     }
 
     fun close() {
-        this.discovery!!.leave(this.syncGroup)
-        this.discovery!!.stop()
-        this.discovery = null
+        val discovery = this.discovery
+        if (discovery != null) {
+            discovery.leave(this.syncGroup)
+            if (this.ourDiscovery) {
+                discovery.stop()
+            }
+            this.discovery = null
+        }
 
         this.masterService.terminate()
 //        this.masterService = null
