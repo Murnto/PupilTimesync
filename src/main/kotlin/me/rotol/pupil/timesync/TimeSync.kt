@@ -131,7 +131,7 @@ class TimeSync(
         this.followerService = null
     }
 
-    private fun restartDiscovery(newNetwork: Zyre? = null) {
+    fun restartDiscovery(newNetwork: Zyre? = null) {
         if (this.discovery != null) {
             this.discovery!!.leave(this.syncGroup)
 
