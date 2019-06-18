@@ -119,7 +119,7 @@ class TimeSync(
         return System.currentTimeMillis() / 1000.0 + this.currentOffset
     }
 
-    fun close() {
+    fun stop() {
         val discovery = this.discovery
         if (discovery != null) {
             discovery.leave(this.syncGroup)
@@ -128,6 +128,10 @@ class TimeSync(
             }
             this.discovery = null
         }
+    }
+
+    fun close() {
+        this.stop()
 
         this.masterService.terminate()
 //        this.masterService = null
